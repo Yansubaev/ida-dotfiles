@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# IDA Theme Manager
+# Generates and applies theme from current wallpaper in one command
+
+set -euo pipefail
+
+readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly CACHE_BASE="$HOME/.cache/ida-theme"
+readonly CURRENT_DIR="$CACHE_BASE/current"
+
+# Parse arguments
+VERBOSE=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -h|--help)
+            cat <<EOF
+IDA Theme Manager
+
+Usage: ida-theme [OPTIONS]
+
+Generates theme from current wallpaper and applies it to all components.
+
+Options:
+  -v, --verbose    Enable verbose output
+  -h, --help       Show this help message
+
+The theme is generated from the wallpaper specified in:
+  $REPO_ROOT/config/hypr/hyprpaper.conf
+
+Override semantic colors by editing:
+  ~/.config/ida-theme/overrides.conf          (global)
+  ~/.cache/ida-theme/themes/<id>/overrides.conf  (per-theme)
+
+EOF
+            exit 0
+            ;;
+        *)
+            echo "Error: Unknown option: $1" >&2
+            echo "Use --help for usage information" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Export for utility functions
+export VERBOSE
+export REPO_ROOT
+export CACHE_BASE
+export CURRENT_DIR
+
+# Source utilities
+source "$REPO_ROOT/scripts/theme/ida-theme-utils.sh"
+
+# Apply theme - symlink all generated files
+apply_theme() {
+    [[ "$VERBOSE" == "true" ]] && echo "[Apply] Symlinking theme files..."
+    
+    # Hyprland
+    mkdir -p "$HOME/.config/hypr"
+    ln -sf "$CURRENT_DIR/hyprland-colors.conf" "$HOME/.config/hypr/ida-theme.conf"
+    ln -sf "$CURRENT_DIR/ida-semantic.conf" "$HOME/.config/hypr/ida-semantic.conf"
+    
+    # Waybar
+    mkdir -p "$HOME/.config/waybar"
+    ln -sf "$CURRENT_DIR/waybar-colors.css" "$HOME/.config/waybar/colors.css"
+    ln -sf "$CURRENT_DIR/ida-semantic.css" "$HOME/.config/waybar/ida-semantic.css"
+    
+    # Wofi - merge base styles + generated colors
+    mkdir -p "$HOME/.config/wofi"
+    cat "$CURRENT_DIR/wofi-colors.css" \
+        "$REPO_ROOT/config/wofi/wofi-base.css" \
+        > "$CURRENT_DIR/wofi-style.css"
+    ln -sf "$CURRENT_DIR/wofi-style.css" "$HOME/.config/wofi/style.css"
+    
+    # Fish shell colors
+    mkdir -p "$HOME/.config/fish"
+    ln -sf "$CURRENT_DIR/fish-theme.fish" "$HOME/.config/fish/ida-theme.fish"
+    ln -sf "$CURRENT_DIR/ida-git-colors.fish" "$HOME/.config/fish/ida-git-colors.fish"
+    ln -sf "$CURRENT_DIR/ida-semantic.fish" "$HOME/.config/fish/ida-semantic.fish"
+    
+    # Terminal emulators
+    ln -sf "$CURRENT_DIR/alacritty.toml" "$HOME/.config/alacritty/theme.toml"
+    ln -sf "$CURRENT_DIR/kitty.conf" "$HOME/.config/kitty/theme.conf"
+    ln -sf "$CURRENT_DIR/ghostty.conf" "$HOME/.config/ghostty/theme.conf"
+    
+    # GTK
+    mkdir -p "$HOME/.config/gtk-4.0" "$HOME/.config/gtk-3.0"
+    ln -sf "$CURRENT_DIR/gtk.css" "$HOME/.config/gtk-4.0/ida-colors.css"
+    ln -sf "$CURRENT_DIR/gtk.css" "$HOME/.config/gtk-3.0/ida-colors.css"
+    
+    # Qt
+    mkdir -p "$HOME/.config/ida-theme"
+    ln -sf "$CURRENT_DIR/qt.conf" "$HOME/.config/ida-theme/qt.conf"
+    
+    [[ "$VERBOSE" == "true" ]] && echo "[Apply] Symlinks created"
+}
+
+main() {
+    [[ "$VERBOSE" == "true" ]] && echo "=== IDA Theme Manager ==="
+    
+    # Create cache directories
+    mkdir -p "$CURRENT_DIR" "$CACHE_BASE/themes"
+    
+    # Step 1: Extract wallpaper path from hyprpaper.conf
+    [[ "$VERBOSE" == "true" ]] && echo "[1/6] Extracting wallpaper path..."
+    wallpaper="$(extract_wallpaper_path)"
+    [[ "$VERBOSE" == "true" ]] && echo "      Wallpaper: $wallpaper"
+    
+    # Step 2: Run wallust to generate base palette
+    [[ "$VERBOSE" == "true" ]] && echo "[2/6] Generating base palette..."
+    run_wallust "$wallpaper"
+    
+    # Step 3: Calculate theme ID
+    [[ "$VERBOSE" == "true" ]] && echo "[3/6] Calculating theme ID..."
+    theme_id="$(calculate_theme_id "$wallpaper")"
+    [[ "$VERBOSE" == "true" ]] && echo "      Theme ID: $theme_id"
+    
+    # Step 4: Initialize override files
+    [[ "$VERBOSE" == "true" ]] && echo "[4/6] Initializing overrides..."
+    init_override_files "$theme_id"
+    
+    # Step 5: Build semantic theme files with Python
+    [[ "$VERBOSE" == "true" ]] && echo "[5/6] Building semantic theme files..."
+    
+    builder_args=(
+        --cache-dir "$CACHE_BASE"
+        --repo-root "$REPO_ROOT"
+        --theme-id "$theme_id"
+    )
+    [[ "$VERBOSE" == "true" ]] && builder_args+=(--verbose)
+    
+    if ! "$REPO_ROOT/scripts/theme/ida-theme-builder.py" "${builder_args[@]}"; then
+        echo "Error: Theme builder failed" >&2
+        exit 1
+    fi
+    
+    # Step 6: Apply theme (symlink everything)
+    [[ "$VERBOSE" == "true" ]] && echo "[6/6] Applying theme..."
+    apply_theme
+    
+    # Save current theme ID
+    echo "$theme_id" > "$CACHE_BASE/current-theme"
+    
+    # Reload components
+    reload_components
+    
+    # Success message
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "=== Theme Applied Successfully ==="
+        echo "Theme: $theme_id"
+        echo "Override files:"
+        echo "  Global: ~/.config/ida-theme/overrides.conf"
+        echo "  Theme:  ~/.cache/ida-theme/themes/$theme_id/overrides.conf"
+    else
+        echo "Theme applied: $theme_id"
+    fi
+}
+
+main "$@"

@@ -1,0 +1,9 @@
+{
+  "urgent": "{{color1}}",
+  "warning": "{{color3}}",
+  "success": "{{color2}}",
+  "info": "{{color4}}",
+  "accent": "{{color4}}",
+  "accent2": "{{color5}}",
+  "text_on_accent": "{{background}}"
+}

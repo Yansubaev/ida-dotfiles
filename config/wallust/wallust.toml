@@ -5,6 +5,7 @@ backend = "fastresize"
 color_space = "lab"
 palette = "dark"
 saturation = 40
+chech_contrast = true
 
 [templates]
 # Generate theme artifacts into ~/.cache/ida-theme/current/
