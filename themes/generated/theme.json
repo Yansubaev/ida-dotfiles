@@ -1,0 +1,28 @@
+{
+  "wallpaper": "/home/ida/ida/assets/wallpapers/snowy-mountain-sunset.jpg",
+  "backend": "fastresize",
+  "colorspace": "lch",
+  "palette": "dark",
+  "alpha": 100,
+  "background": "#202224",
+  "foreground": "#F4EADB",
+  "cursor": "#9D9B95",
+  "colors": [
+    "#46484A",
+    "#0F222B",
+    "#304750",
+    "#5F3F33",
+    "#4E714E",
+    "#9E8557",
+    "#E0AF6A",
+    "#E7D8C3",
+    "#A29788",
+    "#0F222B",
+    "#304750",
+    "#5F3F33",
+    "#4E714E",
+    "#9E8557",
+    "#E0AF6A",
+    "#E7D8C3"
+  ]
+}

@@ -1,0 +1,90 @@
+#!/bin/bash
+
+set -euo pipefail
+
+LOG_DIR="$HOME/.local/share/ida/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/ida-app-launcher.log"
+{
+  echo "---- $(date -Is) ----"
+  echo "argv: $0 $*"
+  echo "PATH: $PATH"
+  echo "WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-} DISPLAY: ${DISPLAY:-}"
+} >>"$LOG_FILE"
+
+# Load config
+CONFIG_FILE="$HOME/.config/ida/ida.conf"
+HYPRLAND_CONFIG="$HOME/.config/hypr/programs.conf"
+
+# First try to load from Hyprland config
+if [ -f "$HYPRLAND_CONFIG" ]; then
+  # Extract variables from Hyprland config
+  # Hyprland config uses: `$terminal = alacritty`.
+  # Avoid polluting the parent shell with `terminal`/`browser` commands by
+  # parsing only the value part.
+  terminal_from_hypr="$(sed -n 's/^\$terminal[[:space:]]*=[[:space:]]*//p' "$HYPRLAND_CONFIG" | head -n 1)"
+  browser_from_hypr="$(sed -n 's/^\$browser[[:space:]]*=[[:space:]]*//p' "$HYPRLAND_CONFIG" | head -n 1)"
+
+  # If found in Hyprland, use them
+  [ -n "$terminal_from_hypr" ] && TERMINAL="$terminal_from_hypr"
+  [ -n "$browser_from_hypr" ] && BROWSER="$browser_from_hypr"
+fi
+
+# Load local config (it has priority)
+# NOTE: config uses quoted values (TERMINAL="alacritty"), so we source it.
+[ -f "$CONFIG_FILE" ] && source "$CONFIG_FILE"
+
+# Provide sensible defaults if user config is missing.
+: "${TERMINAL:=alacritty}"
+: "${TERMINAL_ARGS:=}"
+: "${TERMINAL_CLASS:=}"
+: "${BROWSER:=brave}"
+: "${BROWSER_CLASS:=webapp}"
+: "${BROWSER_ARGS:=}"
+: "${WEBAPP_PROFILE_DIR:=$HOME/.local/share/webapps}"
+
+# Determine launch type
+MODE="$1"
+shift
+
+case "$MODE" in
+terminal)
+  # Run arbitrary/complex commands (pipes, quotes, etc.) safely via a shell.
+  # Many terminals (kitty/alacritty/etc.) do not parse a single string with spaces
+  # as a command; they expect argv. Using `sh -lc` makes it consistent.
+  if [ "$#" -lt 1 ]; then
+    echo "Usage: ida-app-launcher terminal <command>"
+    exit 1
+  fi
+
+  COMMAND_STRING="$*"
+
+  exec "$TERMINAL" $TERMINAL_ARGS $TERMINAL_CLASS -e sh -lc "$COMMAND_STRING"
+  ;;
+webapp)
+  URL="$1"
+  NAME="${2:-WebApp}"
+  PROFILE="$WEBAPP_PROFILE_DIR/$NAME"
+
+  mkdir -p "$PROFILE"
+
+  case "$BROWSER" in
+  firefox)
+    exec firefox --class "$BROWSER_CLASS" --profile "$PROFILE" --new-instance "$URL"
+    ;;
+  chromium | google-chrome-stable)
+    exec $BROWSER --class="$BROWSER_CLASS" --user-data-dir="$PROFILE" --app="$URL"
+    ;;
+  brave)
+    exec brave --class="$BROWSER_CLASS" --app="$URL"
+    ;;
+  *)
+    exec $BROWSER "$URL"
+    ;;
+  esac
+  ;;
+*)
+  echo "Usage: ida-app-launcher {terminal|webapp} [arguments]"
+  exit 1
+  ;;
+esac

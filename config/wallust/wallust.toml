@@ -1,0 +1,11 @@
+# wallust v3 config for ida dotfiles
+# This file is meant to be symlinked to ~/.config/wallust/wallust.toml
+
+backend = "fastresize"
+color_space = "lch"
+palette = "dark"
+saturation = 30
+
+[templates]
+# Generate theme artifacts into ~/.cache/ida-theme/current/
+ida = { template = 'ida/', target = '~/.cache/ida-theme/current/', max_depth = 5 }

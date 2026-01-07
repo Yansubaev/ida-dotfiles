@@ -1,0 +1,8 @@
+allow_images=true
+no_actions=true
+hide_scroll=true
+normal_window=true
+width=20%
+height=40%
+location=center
+insensitive=true

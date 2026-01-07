@@ -1,0 +1,114 @@
+#!/bin/bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)"
+# shellcheck source=./ida-app-lib.sh
+source "$SCRIPT_DIR/ida-app-lib.sh"
+
+REGISTRY_FILE="${IDA_REGISTRY_FILE:-$IDA_REGISTRY_DEFAULT}"
+
+usage() {
+  echo "Usage: ida-remove-app <name> [--type terminal|webapp] [--yes]"
+}
+
+APP_NAME="${1:-}"
+[ "$#" -gt 0 ] && shift || true
+
+FILTER_TYPE=""
+ASSUME_YES="false"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --type)
+      shift
+      FILTER_TYPE="${1:-}"
+      ;;
+    --yes|-y)
+      ASSUME_YES="true"
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [ -z "$APP_NAME" ]; then
+  usage
+  exit 1
+fi
+
+if [ ! -f "$REGISTRY_FILE" ]; then
+  echo "Registry not found: $REGISTRY_FILE" >&2
+  exit 1
+fi
+
+# Collect matching entries (name + optional type)
+mapfile -t MATCHES < <(
+  awk -F'\t' -v n="$APP_NAME" -v t="$FILTER_TYPE" '
+    ($1==n && (t=="" || $2==t)) {
+      print $0
+    }
+  ' "$REGISTRY_FILE"
+)
+
+if [ "${#MATCHES[@]}" -eq 0 ]; then
+  echo "No registry entries found for: $APP_NAME" >&2
+  exit 1
+fi
+
+# Confirm
+if [ "$ASSUME_YES" != "true" ]; then
+  echo "Will remove:"
+  printf '  %s\n' "${MATCHES[@]}"
+  if ! ida__prompt_yes_no "Proceed? [y/N] "; then
+    echo "Aborted." >&2
+    exit 1
+  fi
+fi
+
+# Remove files and clean registry
+changed="false"
+
+for line in "${MATCHES[@]}"; do
+  IFS=$'\t' read -r name type desktop_file icon_value created_at <<<"$line"
+
+  # Desktop file
+  if [ -n "$desktop_file" ] && [ -f "$desktop_file" ]; then
+    rm -f "$desktop_file"
+    changed="true"
+  fi
+
+  # Icon file: remove only if it's an absolute path under our icons dir.
+  if [ -n "$icon_value" ]; then
+    case "$icon_value" in
+      "$IDA_ICONS_DIR_DEFAULT"/*)
+        if [ -f "$icon_value" ]; then
+          rm -f "$icon_value"
+          changed="true"
+        fi
+        ;;
+    esac
+  fi
+
+done
+
+# Rewrite registry removing all matched entries
+awk -F'\t' -v n="$APP_NAME" -v t="$FILTER_TYPE" '!( $1==n && (t=="" || $2==t) )' "$REGISTRY_FILE" >"${REGISTRY_FILE}.tmp" || true
+mv -f "${REGISTRY_FILE}.tmp" "$REGISTRY_FILE"
+
+# If desktop/icon missing, this still cleans registry - intended.
+if [ "$changed" = "true" ]; then
+  update-desktop-database ~/.local/share/applications >/dev/null 2>&1 || true
+fi
+
+# If file is now empty, keep it (simple).
+
+echo "Removed: $APP_NAME"

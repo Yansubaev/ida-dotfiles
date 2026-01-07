@@ -1,0 +1,20 @@
+/* Confirm dialog style: reuse main wofi theme + hide input */
+@import url("../style.css");
+
+#input {
+    opacity: 0;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/* Tighten layout so buttons don't clip */
+#outer-box {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+#entry {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}

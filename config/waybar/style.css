@@ -1,0 +1,197 @@
+@import url("colors.css");
+
+* {
+  border: none;
+  border-radius: 0;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: @ida-bg;
+  color: @ida-fg;
+}
+
+tooltip {
+  border-radius: 12px;
+  background-color: @ida-bg-alt;
+  border: 1px solid @ida-accent2;
+}
+
+/* Modules: Base Style */
+#clock,
+#custom-todo,
+#custom-countdown,
+#backlight,
+#pulseaudio,
+#custom-snip,
+#custom-clip,
+#custom-taskmanager,
+#custom-galculator,
+#tray,
+#idle_inhibitor,
+#custom-power,
+#custom-reboot,
+#custom-quit,
+#custom-lock,
+#custom-suspend,
+#custom-launcher,
+#workspaces {
+  background: @ida-bg-alt;
+  padding: 2px 12px;
+  margin: 4px;
+  color: @ida-fg;
+  border-radius: 25px;
+  border: 3px solid transparent;
+  transition: all 0.3s ease-out;
+}
+
+/* Modules: App Launcher Strip */
+#custom-chrome,
+#custom-terminal,
+#custom-code,
+#custom-music,
+#custom-thunar {
+  background: @ida-bg-alt;
+  padding: 2px 12px;
+  margin-top: 4px;
+  margin-right: 2px;
+  margin-bottom: 4px;
+  color: @ida-fg;
+  border: 3px solid transparent;
+  border-radius: 0;
+  transition: all 0.3s ease-out;
+}
+
+#custom-chrome {
+  margin-left: 2px;
+  border-radius: 25px 0 0 25px;
+}
+
+#custom-thunar {
+  margin-right: 4px;
+  border-radius: 0 25px 25px 0;
+}
+
+/* Modules: Hover Effects */
+#backlight:hover,
+#custom-todo:hover,
+#pulseaudio:hover,
+#custom-snip:hover,
+#custom-chrome:hover,
+#custom-terminal:hover,
+#custom-code:hover,
+#custom-taskmanager:hover,
+#custom-galculator:hover,
+#custom-music:hover,
+#custom-thunar:hover,
+#idle_inhibitor:hover,
+#custom-clip:hover {
+  color: @ida-text-on-accent;
+  background: @ida-accent;
+  border-color: @ida-accent;
+}
+
+#workspaces button {
+  background: transparent;
+  padding: 0 8px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease-out;
+  border-radius: 4px;
+}
+
+#workspaces button:hover {
+  background: @ida-bg-hover;
+  border-bottom-color: @ida-accent;
+}
+
+#workspaces button.active {
+  background: @ida-bg-hover;
+  border-bottom-color: @ida-accent;
+}
+
+#workspaces button.urgent {
+  border-bottom-color: @ida-urgent;
+}
+
+#custom-launcher:hover {
+  border-color: @ida-accent2;
+}
+
+#custom-power:hover {
+  border-color: @ida-urgent;
+}
+
+#custom-reboot:hover,
+#custom-quit:hover,
+#custom-lock:hover,
+#custom-suspend:hover {
+  background: @ida-warning;
+  border-color: @ida-warning;
+}
+
+/* Modules: Specific Styles */
+#custom-launcher {
+  background: @ida-accent2;
+  color: @ida-text-on-accent;
+  padding: 0 12px 0 10px;
+}
+
+#custom-launcher label {
+  min-width: 1.2em;
+  margin-right: 4px;
+}
+
+#custom-countdown,
+#clock {
+  background: @ida-info;
+  color: @ida-text-on-accent;
+}
+
+#pulseaudio.muted {
+  background: @ida-warning;
+  color: @ida-text-on-accent;
+}
+
+#custom-power {
+  padding: 0px 12px 0px 9px;
+}
+
+#keyboard-state {
+  background: transparent;
+}
+
+#keyboard-state label.locked {
+  background: @ida-info;
+  color: @ida-text-on-accent;
+  padding: 0px 12px;
+  margin: 4px 0px;
+  border-radius: 25px;
+}
+
+#taskbar {
+  background: @ida-bg-alt;
+  padding: 0 22px;
+  margin: 4px;
+  border: transparent;
+  border-radius: 25px;
+}
+
+#taskbar button {
+  background: transparent;
+  padding: 0 8px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease-out;
+  border-radius: 4px;
+}
+
+#taskbar button:hover {
+  background: @ida-bg-hover;
+  border-bottom-color: @ida-accent;
+}
+
+#taskbar button.active {
+  background: @ida-bg-hover;
+  border-bottom-color: @ida-accent;
+}

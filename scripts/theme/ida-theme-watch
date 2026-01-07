@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# We watch the *live* hyprpaper config that Hyprland uses.
+hyprpaper_conf="$HOME/.config/hypr/hyprpaper.conf"
+
+# Fallback for first run (in your repo)
+if [[ ! -f "$hyprpaper_conf" ]]; then
+  hyprpaper_conf="$repo_root/config/hypr/hyprpaper.conf"
+fi
+
+if ! command -v inotifywait >/dev/null 2>&1; then
+  echo "inotifywait not found (package: inotify-tools)" >&2
+  exit 1
+fi
+
+while true; do
+  # Wait for changes (write, move, create)
+  inotifywait -q -e close_write,move,create "$hyprpaper_conf" >/dev/null 2>&1 || true
+
+  # Debounce bursty writes
+  sleep 0.3
+
+  "$repo_root/scripts/theme/ida-theme-generate" >/dev/null 2>&1 || continue
+  "$repo_root/scripts/theme/ida-theme-apply" >/dev/null 2>&1 || true
+
+done
