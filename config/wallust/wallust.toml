@@ -2,9 +2,9 @@
 # This file is meant to be symlinked to ~/.config/wallust/wallust.toml
 
 backend = "fastresize"
-color_space = "lch"
+color_space = "lab"
 palette = "dark"
-saturation = 30
+saturation = 40
 
 [templates]
 # Generate theme artifacts into ~/.cache/ida-theme/current/

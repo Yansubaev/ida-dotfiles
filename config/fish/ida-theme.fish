@@ -1,0 +1,1 @@
+/home/ida/.cache/ida-theme/current/fish-theme.fish

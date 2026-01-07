@@ -5,12 +5,12 @@
 @define-color ida-bg-alt #323436;
 @define-color ida-bg-hover #484A4B;
 
-@define-color ida-accent #4E714E;
-@define-color ida-accent2 #9E8557;
-@define-color ida-info #E0AF6A;
-@define-color ida-warning #5F3F33;
-@define-color ida-urgent #0F222B;
+@define-color ida-accent #437143;
+@define-color ida-accent2 #9E804A;
+@define-color ida-info #E0A95B;
+@define-color ida-warning #5F3A2C;
+@define-color ida-urgent #0D212B;
 
 @define-color ida-border-inactive #636466;
-@define-color ida-border-active #4E714E;
+@define-color ida-border-active #437143;
 @define-color ida-text-on-accent #202224;

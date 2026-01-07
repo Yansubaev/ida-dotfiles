@@ -32,6 +32,11 @@ ln -sf "$current_dir/kitty.conf" "$HOME/.config/kitty/theme.conf"
 # Ghostty
 ln -sf "$current_dir/ghostty.conf" "$HOME/.config/ghostty/theme.conf"
 
+# Fish shell colors (syntax highlighting)
+mkdir -p "$HOME/.config/fish"
+ln -sf "$current_dir/fish-theme.fish" "$HOME/.config/fish/ida-theme.fish"
+ln -sf "$current_dir/ida-git-colors.fish" "$HOME/.config/fish/ida-git-colors.fish"
+
 # GTK: we can't force a theme universally, but we can provide a css snippet.
 mkdir -p "$HOME/.config/gtk-4.0" "$HOME/.config/gtk-3.0"
 ln -sf "$current_dir/gtk.css" "$HOME/.config/gtk-4.0/ida-colors.css"
