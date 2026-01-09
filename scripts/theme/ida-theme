@@ -57,7 +57,9 @@ source "$REPO_ROOT/scripts/theme/ida-theme-utils.sh"
 
 # Apply theme - symlink all generated files
 apply_theme() {
-    [[ "$VERBOSE" == "true" ]] && echo "[Apply] Symlinking theme files..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[Apply] Symlinking theme files..."
+    fi
     
     # Hyprland
     mkdir -p "$HOME/.config/hypr"
@@ -96,42 +98,62 @@ apply_theme() {
     mkdir -p "$HOME/.config/ida-theme"
     ln -sf "$CURRENT_DIR/qt.conf" "$HOME/.config/ida-theme/qt.conf"
     
-    [[ "$VERBOSE" == "true" ]] && echo "[Apply] Symlinks created"
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[Apply] Symlinks created"
+    fi
 }
 
 main() {
-    [[ "$VERBOSE" == "true" ]] && echo "=== IDA Theme Manager ==="
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "=== IDA Theme Manager ==="
+    fi
     
     # Create cache directories
     mkdir -p "$CURRENT_DIR" "$CACHE_BASE/themes"
     
     # Step 1: Extract wallpaper path from hyprpaper.conf
-    [[ "$VERBOSE" == "true" ]] && echo "[1/6] Extracting wallpaper path..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[1/6] Extracting wallpaper path..."
+    fi
     wallpaper="$(extract_wallpaper_path)"
-    [[ "$VERBOSE" == "true" ]] && echo "      Wallpaper: $wallpaper"
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "      Wallpaper: $wallpaper"
+    fi
     
     # Step 2: Run wallust to generate base palette
-    [[ "$VERBOSE" == "true" ]] && echo "[2/6] Generating base palette..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[2/6] Generating base palette..."
+    fi
     run_wallust "$wallpaper"
     
     # Step 3: Calculate theme ID
-    [[ "$VERBOSE" == "true" ]] && echo "[3/6] Calculating theme ID..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[3/6] Calculating theme ID..."
+    fi
     theme_id="$(calculate_theme_id "$wallpaper")"
-    [[ "$VERBOSE" == "true" ]] && echo "      Theme ID: $theme_id"
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "      Theme ID: $theme_id"
+    fi
     
     # Step 4: Initialize override files
-    [[ "$VERBOSE" == "true" ]] && echo "[4/6] Initializing overrides..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[4/6] Initializing overrides..."
+    fi
     init_override_files "$theme_id"
     
     # Step 5: Build semantic theme files with Python
-    [[ "$VERBOSE" == "true" ]] && echo "[5/6] Building semantic theme files..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[5/6] Building semantic theme files..."
+    fi
     
     builder_args=(
         --cache-dir "$CACHE_BASE"
         --repo-root "$REPO_ROOT"
         --theme-id "$theme_id"
     )
-    [[ "$VERBOSE" == "true" ]] && builder_args+=(--verbose)
+    if [[ "$VERBOSE" == "true" ]]; then
+        builder_args+=(--verbose)
+    fi
     
     if ! "$REPO_ROOT/scripts/theme/ida-theme-builder.py" "${builder_args[@]}"; then
         echo "Error: Theme builder failed" >&2
@@ -139,7 +161,9 @@ main() {
     fi
     
     # Step 6: Apply theme (symlink everything)
-    [[ "$VERBOSE" == "true" ]] && echo "[6/6] Applying theme..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[6/6] Applying theme..."
+    fi
     apply_theme
     
     # Save current theme ID

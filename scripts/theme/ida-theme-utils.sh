@@ -6,10 +6,14 @@ set -euo pipefail
 
 # Extract wallpaper path from hyprpaper.conf
 extract_wallpaper_path() {
-    local hyprpaper_conf="$REPO_ROOT/config/hypr/hyprpaper.conf"
+    # Try live config first, then repo config
+    local hyprpaper_conf="$HOME/.config/hypr/hyprpaper.conf"
+    if [[ ! -f "$hyprpaper_conf" ]]; then
+        hyprpaper_conf="$REPO_ROOT/config/hypr/hyprpaper.conf"
+    fi
     
     if [[ ! -f "$hyprpaper_conf" ]]; then
-        echo "Error: hyprpaper.conf not found: $hyprpaper_conf" >&2
+        echo "Error: hyprpaper.conf not found" >&2
         return 1
     fi
     
@@ -70,7 +74,9 @@ run_wallust() {
         return 1
     fi
     
-    [[ "$VERBOSE" == "true" ]] && echo "[Wallust] Generating palette from: $wallpaper"
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[Wallust] Generating palette from: $wallpaper"
+    fi
     
     wallust run -q \
         -C "$REPO_ROOT/config/wallust/wallust.toml" \
@@ -83,7 +89,9 @@ run_wallust() {
         return 1
     fi
     
-    [[ "$VERBOSE" == "true" ]] && echo "[Wallust] Generation complete"
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[Wallust] Generation complete"
+    fi
 }
 
 # Initialize override files
@@ -98,7 +106,9 @@ init_override_files() {
     
     # Create global override template if missing
     if [[ ! -f "$global_override" ]]; then
-        [[ "$VERBOSE" == "true" ]] && echo "[Init] Creating global override template"
+        if [[ "$VERBOSE" == "true" ]]; then
+            echo "[Init] Creating global override template"
+        fi
         cat >"$global_override" <<'EOF'
 # Global semantic color overrides (hex #RRGGBB format)
 # Per-theme overrides: ~/.cache/ida-theme/themes/<theme_id>/overrides.conf
@@ -123,34 +133,48 @@ EOF
     
     # Create theme directory and copy current theme if new
     if [[ ! -d "$theme_dir" ]]; then
-        [[ "$VERBOSE" == "true" ]] && echo "[Init] Creating theme directory: $theme_id"
+        if [[ "$VERBOSE" == "true" ]]; then
+            echo "[Init] Creating theme directory: $theme_id"
+        fi
         mkdir -p "$theme_dir"
         cp -a "$CURRENT_DIR/." "$theme_dir/"
     fi
     
     # Create per-theme override if missing
     if [[ ! -f "$per_theme_override" ]]; then
-        [[ "$VERBOSE" == "true" ]] && echo "[Init] Creating per-theme override file"
+        if [[ "$VERBOSE" == "true" ]]; then
+            echo "[Init] Creating per-theme override file"
+        fi
         cp "$global_override" "$per_theme_override"
     fi
 }
 
 # Reload running components
 reload_components() {
-    [[ "$VERBOSE" == "true" ]] && echo "[Reload] Reloading components..."
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo "[Reload] Reloading components..."
+    fi
     
     # Reload Hyprland config
     if command -v hyprctl >/dev/null 2>&1; then
-        if hyprctl reload >/dev/null 2>&1; then
-            [[ "$VERBOSE" == "true" ]] && echo "[Reload] Hyprland reloaded"
+        hyprctl reload >/dev/null 2>&1 || true
+        if [[ "$VERBOSE" == "true" ]]; then
+            echo "[Reload] Hyprland reloaded"
         fi
     fi
     
+    # Wait a moment for Hyprland to process config
+    sleep 0.2
+    
     # Restart Waybar if running
     if pgrep -x waybar >/dev/null 2>&1; then
-        [[ "$VERBOSE" == "true" ]] && echo "[Reload] Restarting Waybar"
+        if [[ "$VERBOSE" == "true" ]]; then
+            echo "[Reload] Restarting Waybar"
+        fi
         pkill -x waybar || true
+        sleep 0.3
         nohup waybar >/dev/null 2>&1 &
+        disown
     fi
     
     # Note: Wofi is spawned on-demand, no restart needed

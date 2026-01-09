@@ -8,7 +8,7 @@
   "reload_style_on_change": true,
   "modules-left": ["custom/launcher", "hyprland/workspaces"],
   "modules-center": ["clock"],
-  "modules-right": ["pulseaudio", "tray"],
+  "modules-right": ["pulseaudio", "tray", "custom/power"],
   "hyprland/workspaces": {
     "format": "{name}",
     "sort-by-number": true,
@@ -49,5 +49,11 @@
     "tooltip-format": "App menu",
     "on-click": "killall wofi 2>/dev/null || wofi --show drun",
     "on-click-right": "bash ~/.config/waybar/scripts/theme.sh",
+  },
+  "custom/power": {
+    "format": "",
+    "tootltip": true,
+    "tooltip-format": "Power menu",
+    "on-click": "~/ida/config/wofi/scripts/powermenu.sh",
   },
 }

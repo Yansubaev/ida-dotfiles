@@ -10,7 +10,12 @@
  */
 
 * {
-  font-family: "Font Awesome 5 Free", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    JetBrainsMono Nerd Font,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   font-size: 14px;
   border: none;
 }
@@ -57,6 +62,12 @@
 
 #entry:selected {
   background-color: @ida-accent;
+  outline: none;
+}
+
+#entry image {
+  margin-right: 8px;
+  min-width: 32px;
 }
 
 #text {

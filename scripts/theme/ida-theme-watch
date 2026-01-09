@@ -5,7 +5,14 @@
 set -euo pipefail
 
 readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-readonly HYPRPAPER_CONF="$REPO_ROOT/config/hypr/hyprpaper.conf"
+
+# Watch the live config that Hyprland actually uses
+HYPRPAPER_CONF="$HOME/.config/hypr/hyprpaper.conf"
+
+# Fallback to repo config if live config doesn't exist yet
+if [[ ! -f "$HYPRPAPER_CONF" ]]; then
+    HYPRPAPER_CONF="$REPO_ROOT/config/hypr/hyprpaper.conf"
+fi
 
 if ! command -v inotifywait >/dev/null 2>&1; then
     echo "Error: inotifywait not found. Please install inotify-tools" >&2
@@ -21,5 +28,20 @@ echo "Watching for wallpaper changes: $HYPRPAPER_CONF"
 
 while inotifywait -e modify,close_write "$HYPRPAPER_CONF" >/dev/null 2>&1; do
     echo "Wallpaper changed, regenerating theme..."
+    
+    # Small delay to let file writes complete
+    sleep 0.5
+    
+    # Reload hyprpaper to apply new wallpaper
+    if command -v hyprctl >/dev/null 2>&1; then
+        if pgrep -x hyprpaper >/dev/null 2>&1; then
+            echo "Reloading hyprpaper..."
+            pkill -x hyprpaper || true
+            sleep 0.3
+            hyprpaper &
+        fi
+    fi
+    
+    # Generate and apply theme
     "$REPO_ROOT/scripts/theme/ida-theme"
 done

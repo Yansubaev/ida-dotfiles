@@ -3,7 +3,7 @@
 * {
   border: none;
   border-radius: 0;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-family:JetBrainsMono Nerd Font, Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
   min-height: 0;
 }
@@ -16,7 +16,7 @@ window#waybar {
 tooltip {
   border-radius: 12px;
   background-color: @ida-bg-alt;
-  border: 1px solid @ida-accent2;
+  border: 2px solid @ida-accent2;
 }
 
 /* Modules: Base Style */
@@ -50,9 +50,7 @@ tooltip {
 /* Modules: App Launcher Strip */
 #custom-chrome,
 #custom-terminal,
-#custom-code,
-#custom-music,
-#custom-thunar {
+#custom-music{
   background: @ida-bg-alt;
   padding: 2px 12px;
   margin-top: 4px;
@@ -62,16 +60,6 @@ tooltip {
   border: 3px solid transparent;
   border-radius: 0;
   transition: all 0.3s ease-out;
-}
-
-#custom-chrome {
-  margin-left: 2px;
-  border-radius: 25px 0 0 25px;
-}
-
-#custom-thunar {
-  margin-right: 4px;
-  border-radius: 0 25px 25px 0;
 }
 
 /* Modules: Hover Effects */
@@ -116,10 +104,12 @@ tooltip {
 }
 
 #custom-launcher:hover {
+  background: @ida-accent2;
   border-color: @ida-accent2;
 }
 
 #custom-power:hover {
+  background: @ida-urgent;
   border-color: @ida-urgent;
 }
 
@@ -133,7 +123,7 @@ tooltip {
 
 /* Modules: Specific Styles */
 #custom-launcher {
-  background: @ida-accent2;
+  background: @ida-accent;
   color: @ida-text-on-accent;
   padding: 0 12px 0 10px;
 }
@@ -155,7 +145,9 @@ tooltip {
 }
 
 #custom-power {
-  padding: 0px 12px 0px 9px;
+  background: @ida-accent;
+  color: @ida-text-on-accent;
+  padding: 0px 16px 0px 12px;
 }
 
 #keyboard-state {

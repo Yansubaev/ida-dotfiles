@@ -5,6 +5,7 @@ return {
       formatters_by_ft = {
         json = { "prettier" },
         jsonc = { "prettier" },
+        css = { "prettier" },
       },
     },
   },
