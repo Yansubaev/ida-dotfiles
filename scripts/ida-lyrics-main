@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Wrapper script for lyrics-main.sh
+# This allows calling `ida-lyrics-main` from PATH instead of using absolute paths in configs
+exec "$(dirname "$(readlink -f "$0")")/lyrics/lyrics-main.sh" "$@"

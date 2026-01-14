@@ -1,0 +1,262 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# IDA Dotfiles - Restore Backups
+# ==============================================================================
+# Restores configs from backups created during installation
+#
+# Usage: ./restore [OPTIONS]
+#
+# Options:
+#   --list              List available backups
+#   --session TIMESTAMP Restore specific backup session
+#   --only NAME         Restore only specific config (e.g., --only hypr)
+#   --dry-run           Show what would be done without making changes
+#   --help              Show this help
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+# ==============================================================================
+# CLI
+# ==============================================================================
+
+ACTION="interactive"
+SESSION=""
+ONLY=""
+
+show_help() {
+    cat << 'EOF'
+IDA Dotfiles - Restore Backups
+
+Usage: ./restore [OPTIONS]
+
+Options:
+  --list              List available backup sessions
+  --session TIMESTAMP Restore from specific backup session
+  --only NAME         Restore only specific config (e.g., --only hypr)
+  --dry-run           Show what would be done
+  --help              Show this help
+
+Examples:
+  ./restore --list                        # List all backups
+  ./restore --session 20240115_143022     # Restore specific session
+  ./restore --only hypr                   # Restore only hypr config
+  ./restore --dry-run                     # Preview restore
+EOF
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --list)
+                ACTION="list"
+                shift
+                ;;
+            --session)
+                SESSION="$2"
+                shift 2
+                ;;
+            --only)
+                ONLY="$2"
+                shift 2
+                ;;
+            --dry-run)
+                export IDA_DRY_RUN="true"
+                shift
+                ;;
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# ==============================================================================
+# Functions
+# ==============================================================================
+
+list_backups() {
+    if [[ ! -d "$IDA_BACKUP_DIR" ]]; then
+        log_info "No backups found at $IDA_BACKUP_DIR"
+        return 0
+    fi
+    
+    echo ""
+    log_info "Available backup sessions:"
+    echo ""
+    
+    local count=0
+    for session_dir in "$IDA_BACKUP_DIR"/*/; do
+        if [[ -d "$session_dir" ]]; then
+            local session_name
+            session_name=$(basename "$session_dir")
+            
+            # Count items in backup
+            local item_count
+            item_count=$(find "$session_dir" -maxdepth 1 -mindepth 1 | wc -l)
+            
+            # Format timestamp for display
+            local formatted_date=""
+            if [[ "$session_name" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})([0-9]{2})([0-9]{2})$ ]]; then
+                formatted_date="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
+            fi
+            
+            echo -e "  ${BOLD}$session_name${RESET} ($item_count items)"
+            [[ -n "$formatted_date" ]] && echo -e "    ${DIM}$formatted_date${RESET}"
+            
+            # List items
+            for item in "$session_dir"/*; do
+                if [[ -e "$item" ]]; then
+                    local item_name
+                    item_name=$(basename "$item")
+                    echo -e "    - $item_name"
+                fi
+            done
+            echo ""
+            ((count++)) || true
+        fi
+    done
+    
+    if [[ $count -eq 0 ]]; then
+        log_info "No backup sessions found"
+    else
+        log_info "Total: $count session(s)"
+    fi
+}
+
+select_session() {
+    if [[ -n "$SESSION" ]]; then
+        if [[ -d "$IDA_BACKUP_DIR/$SESSION" ]]; then
+            echo "$IDA_BACKUP_DIR/$SESSION"
+        else
+            log_error "Backup session not found: $SESSION"
+            return 1
+        fi
+    else
+        # Find most recent backup
+        local latest
+        latest=$(find "$IDA_BACKUP_DIR" -maxdepth 1 -mindepth 1 -type d | sort -r | head -1)
+        
+        if [[ -z "$latest" ]]; then
+            log_error "No backups found"
+            return 1
+        fi
+        
+        echo "$latest"
+    fi
+}
+
+restore_item() {
+    local source="$1"
+    local target="$2"
+    
+    local item_name
+    item_name=$(basename "$source")
+    
+    # Filter by --only if specified
+    if [[ -n "$ONLY" && "$item_name" != "$ONLY" ]]; then
+        return 0
+    fi
+    
+    log_info "Restoring: $item_name"
+    
+    # If target exists, back it up first (to new backup session)
+    if [[ -e "$target" || -L "$target" ]]; then
+        if [[ "$IDA_DRY_RUN" == "true" ]]; then
+            log_dry "  Would backup current: $target"
+        else
+            # Create new backup for current state
+            local new_backup_dir="$IDA_BACKUP_DIR/restore_$(date +%Y%m%d_%H%M%S)"
+            mkdir -p "$new_backup_dir"
+            mv "$target" "$new_backup_dir/"
+            log_info "  Backed up current to: $new_backup_dir/$item_name"
+        fi
+    fi
+    
+    # Restore from backup
+    if [[ "$IDA_DRY_RUN" == "true" ]]; then
+        log_dry "  Would restore: $source -> $target"
+    else
+        cp -a "$source" "$target"
+        log_success "  Restored: $target"
+    fi
+}
+
+restore_session() {
+    local session_dir
+    session_dir=$(select_session) || return 1
+    
+    local session_name
+    session_name=$(basename "$session_dir")
+    
+    echo ""
+    log_info "Restoring from session: $session_name"
+    echo ""
+    
+    local restored=0
+    
+    for item in "$session_dir"/*; do
+        if [[ -e "$item" ]]; then
+            local item_name
+            item_name=$(basename "$item")
+            
+            # Determine target path (assume it goes to ~/.config/)
+            local target="$IDA_CONFIG_DIR/$item_name"
+            
+            restore_item "$item" "$target"
+            ((restored++)) || true
+        fi
+    done
+    
+    echo ""
+    if [[ "$IDA_DRY_RUN" == "true" ]]; then
+        log_info "Would restore $restored item(s)"
+    else
+        log_success "Restored $restored item(s)"
+    fi
+}
+
+interactive_restore() {
+    list_backups
+    
+    echo ""
+    if ! ask_yes_no "Restore from most recent backup?" "n"; then
+        log_info "Aborted"
+        return 0
+    fi
+    
+    restore_session
+}
+
+# ==============================================================================
+# Main
+# ==============================================================================
+
+main() {
+    parse_args "$@"
+    
+    print_header "IDA Dotfiles - Restore"
+    
+    case "$ACTION" in
+        list)
+            list_backups
+            ;;
+        interactive)
+            if [[ -n "$SESSION" ]]; then
+                restore_session
+            else
+                interactive_restore
+            fi
+            ;;
+    esac
+}
+
+main "$@"

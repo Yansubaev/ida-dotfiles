@@ -97,6 +97,14 @@ apply_theme() {
     # Qt
     mkdir -p "$HOME/.config/ida-theme"
     ln -sf "$CURRENT_DIR/qt.conf" "$HOME/.config/ida-theme/qt.conf"
+
+    # Mako
+    mkdir -p "$HOME/.config/mako"
+    # Avoid "same file" error when repo already lives in ~/.config
+    if [[ ! -e "$HOME/.config/mako/config" ]] || [[ "$(readlink -f "$HOME/.config/mako/config")" != "$REPO_ROOT/config/mako/config" ]]; then
+        ln -sf "$REPO_ROOT/config/mako/config" "$HOME/.config/mako/config"
+    fi
+    ln -sf "$CURRENT_DIR/mako-colors.conf" "$HOME/.config/mako/ida-theme.conf"
     
     if [[ "$VERBOSE" == "true" ]]; then
         echo "[Apply] Symlinks created"

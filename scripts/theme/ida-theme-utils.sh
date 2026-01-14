@@ -176,6 +176,17 @@ reload_components() {
         nohup waybar >/dev/null 2>&1 &
         disown
     fi
+
+    
+    # Reload mako if available
+    if command -v makoctl >/dev/null 2>&1; then
+        if pgrep -x mako >/dev/null 2>&1; then
+            if [[ "$VERBOSE" == "true" ]]; then
+                echo "[Reload] Reloading mako"
+            fi
+            makoctl reload >/dev/null 2>&1 || true
+        fi
+    fi
     
     # Note: Wofi is spawned on-demand, no restart needed
     # Note: Fish will pick up changes on next shell start or source

@@ -12,6 +12,7 @@ The IDA theme system automatically generates color schemes for your desktop envi
 - **Fish Shell** - Syntax highlighting
 - **Terminals** - Alacritty, Kitty, Ghostty
 - **GTK/Qt** - Application theming
+- **Mako** - Notification daemon
 
 The system supports semantic color overrides, allowing you to manually set colors for specific purposes (urgent, warning, success, etc.) that remain consistent across wallpaper changes.
 
@@ -271,6 +272,7 @@ Theme files are generated in `~/.cache/ida-theme/current/`:
 | `ghostty.conf` | Ghostty terminal colors |
 | `gtk.css` | GTK color variables |
 | `qt.conf` | Qt color variables |
+| `mako-colors.conf` | Mako notification colors |
 
 ## Dependencies
 

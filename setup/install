@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# IDA Dotfiles - Main Installer
+# ==============================================================================
+# Usage: ./install [OPTIONS]
+#
+# Options:
+#   --safe          Skip existing files (only install if missing)
+#   --force         Remove existing files without backup
+#   --dry-run       Show what would be done without making changes
+#   --no-packages   Skip package installation
+#   --no-config     Skip config symlinks
+#   --no-bin        Skip bin symlinks
+#   --only STEP     Run only specified step (repo|packages|config|bin|post)
+#   --help          Show this help message
+#
+# Default mode: backup existing files and replace with symlinks
+
+set -euo pipefail
+
+# Get script directory and source library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib.sh"
+
+# ==============================================================================
+# CLI Argument Parsing
+# ==============================================================================
+
+SKIP_PACKAGES=false
+SKIP_CONFIG=false
+SKIP_BIN=false
+ONLY_STEP=""
+
+show_help() {
+    cat << 'EOF'
+IDA Dotfiles Installer
+
+Usage: ./install [OPTIONS]
+
+Installation Modes:
+  (default)     Backup existing configs and replace with symlinks
+  --safe        Skip existing files (only install if missing)  
+  --force       Remove existing files without backup
+
+Behavior Options:
+  --dry-run     Show what would be done without making changes
+  --no-packages Skip package installation
+  --no-config   Skip config symlinks
+  --no-bin      Skip bin symlinks
+  --only STEP   Run only specified step: repo, packages, config, bin, post
+
+Other:
+  --help        Show this help message
+
+Examples:
+  ./install                    # Full install with backups
+  ./install --dry-run          # Preview all changes
+  ./install --safe             # Only install missing configs
+  ./install --only packages    # Only install packages
+  ./install --no-packages      # Install configs/scripts only
+EOF
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --safe)
+                export IDA_MODE="safe"
+                shift
+                ;;
+            --force)
+                export IDA_MODE="force"
+                shift
+                ;;
+            --dry-run)
+                export IDA_DRY_RUN="true"
+                shift
+                ;;
+            --no-packages)
+                SKIP_PACKAGES=true
+                shift
+                ;;
+            --no-config)
+                SKIP_CONFIG=true
+                shift
+                ;;
+            --no-bin)
+                SKIP_BIN=true
+                shift
+                ;;
+            --only)
+                ONLY_STEP="$2"
+                shift 2
+                ;;
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# ==============================================================================
+# Step Runners
+# ==============================================================================
+
+should_run_step() {
+    local step="$1"
+    
+    # If --only specified, only run that step
+    if [[ -n "$ONLY_STEP" ]]; then
+        [[ "$ONLY_STEP" == "$step" ]]
+        return
+    fi
+    
+    # Otherwise check skip flags
+    case "$step" in
+        packages) [[ "$SKIP_PACKAGES" == "false" ]] ;;
+        config)   [[ "$SKIP_CONFIG" == "false" ]] ;;
+        bin)      [[ "$SKIP_BIN" == "false" ]] ;;
+        *)        return 0 ;;
+    esac
+}
+
+run_step() {
+    local step_script="$1"
+    local step_name="$2"
+    
+    if [[ -f "$SCRIPT_DIR/$step_script" ]]; then
+        log_step "Running: $step_name"
+        # Use source instead of bash to preserve environment variables
+        source "$SCRIPT_DIR/$step_script"
+    else
+        log_warn "Step script not found: $step_script"
+    fi
+}
+
+# ==============================================================================
+# Main
+# ==============================================================================
+
+main() {
+    parse_args "$@"
+    
+    print_header "IDA Dotfiles Installer"
+    print_mode_info
+    
+    # Detect system
+    local os os_family pkg_manager aur_helper
+    os=$(detect_os)
+    os_family=$(detect_os_family)
+    pkg_manager=$(detect_package_manager)
+    aur_helper=$(detect_aur_helper)
+    
+    log_info "Detected OS: $os (family: $os_family)"
+    log_info "Package manager: ${pkg_manager:-none}"
+    [[ -n "$aur_helper" ]] && log_info "AUR helper: $aur_helper"
+    echo ""
+    
+    # Check basic requirements
+    check_requirements git || exit 1
+    
+    # Step 1: Repo placement
+    if should_run_step "repo"; then
+        run_step "10-repo.sh" "Repository Setup"
+    fi
+    
+    # Step 2: Packages
+    if should_run_step "packages"; then
+        run_step "20-packages.sh" "Package Installation"
+    fi
+    
+    # Step 3: Config symlinks
+    if should_run_step "config"; then
+        run_step "30-config.sh" "Config Symlinks"
+    fi
+    
+    # Step 4: Bin symlinks
+    if should_run_step "bin"; then
+        run_step "40-bin.sh" "Script Symlinks"
+    fi
+    
+    # Step 5: Post-install
+    if should_run_step "post"; then
+        run_step "50-post.sh" "Post-Installation"
+    fi
+    
+    echo ""
+    if [[ "$IDA_DRY_RUN" == "true" ]]; then
+        log_info "Dry-run complete. No changes were made."
+    else
+        log_success "Installation complete!"
+    fi
+}
+
+main "$@"

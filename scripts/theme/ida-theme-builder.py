@@ -178,6 +178,7 @@ class OverrideManager:
 
 class ThemeBuilder:
     """Main theme builder orchestrating all generation."""
+
     
     def __init__(self, cache_dir: Path, repo_root: Path, theme_id: str, verbose: bool = False):
         self.cache_dir = cache_dir
@@ -334,6 +335,30 @@ class ThemeBuilder:
         
         self.log(f"  Written: {output_path}")
     
+    def generate_mako_colors(self, data: Dict):
+        """Generate mako colors config from theme + semantic colors."""
+        self.log("Generating mako-colors.conf...")
+
+        theme = data["theme"]
+        semantic = data["semantic"]
+
+        bg = theme["background"]
+        template_data = {
+            "bg": bg,
+            "fg": theme["foreground"],
+            "accent": semantic["accent"],
+            "border": theme["colors"][5],
+            "border_low": theme["colors"][8],
+            "border_normal": semantic["accent"],
+            "border_high": semantic["urgent"],
+        }
+
+        content = self.render_template("mako-colors.conf.tmpl", template_data)
+        output_path = self.current_dir / "mako-colors.conf"
+        output_path.write_text(content)
+
+        self.log(f"  Written: {output_path}")
+
     def build(self):
         """Main build process."""
         self.log(f"Building theme: {self.theme_id}")
@@ -362,6 +387,7 @@ class ThemeBuilder:
         self.generate_semantic_conf(semantic)
         self.generate_semantic_css(semantic)
         self.generate_semantic_fish(semantic)
+        self.generate_mako_colors(data)
         
         self.log("Build complete!")
 
