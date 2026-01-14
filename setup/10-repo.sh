@@ -16,7 +16,7 @@ fi
 # Configuration
 # ==============================================================================
 
-REPO_URL="https://github.com/anomalyco/ida.git"  # Update with your actual repo URL
+REPO_URL="https://github.com/Yansubaev/ida-dotfiles.git"
 CANONICAL_PATH="$HOME/.dotfiles/ida"
 DOTFILES_PARENT="$HOME/.dotfiles"
 
