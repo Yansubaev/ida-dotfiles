@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Create ~/.local/share/unity3d directory if it doesn't exist
+mkdir -p ~/.local/share/unity3d
+
+echo "✓ Directory ~/.local/share/unity3d has been created/verified"

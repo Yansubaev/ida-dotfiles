@@ -3,6 +3,7 @@
 SETUVAR __done_min_cmd_duration:10000
 SETUVAR __done_notification_urgency_level:low
 SETUVAR __fish_initialized:4300
+SETUVAR _fisher_upgraded_to_4_4:\x1d
 SETUVAR --export fish_color_autosuggestion:A9A288
 SETUVAR --export fish_color_command:FBF4DB
 SETUVAR --export fish_color_comment:A9A288

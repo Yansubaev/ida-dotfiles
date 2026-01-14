@@ -6,7 +6,7 @@
   "margin-top": 0,
   "margin-bottom": 0,
   "reload_style_on_change": true,
-  "modules-left": ["custom/launcher", "hyprland/workspaces"],
+  "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/lyrics"],
   "modules-center": ["clock"],
   "modules-right": ["pulseaudio", "tray", "custom/power"],
   "hyprland/workspaces": {
@@ -15,7 +15,7 @@
     "on-click": "activate",
   },
   "tray": {
-    "icon-size": 20,
+    "icon-size": 17,
     "spacing": 10,
   },
   "clock": {
@@ -55,5 +55,13 @@
     "tootltip": true,
     "tooltip-format": "Power menu",
     "on-click": "~/ida/config/wofi/scripts/powermenu.sh",
+  },
+  "custom/lyrics": {
+    "exec": "stdbuf -oL ~/ida/scripts/lyrics/lyrics-main.sh --offset 500 --interval 50 --max-length 80 --json",
+    "return-type": "json",
+    "format": "{}",
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl previous",
+    "on-scroll-down": "playerctl next",
   },
 }
