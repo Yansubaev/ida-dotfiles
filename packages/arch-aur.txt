@@ -4,41 +4,19 @@
 # These packages require an AUR helper (yay/paru).
 # The installer will automatically install yay if no AUR helper is found.
 
+# Networking
 wlctl-bin
-
-# ------------------------------------------------------------------------------
-# Browsers
-# ------------------------------------------------------------------------------
 brave-bin
 
-# ------------------------------------------------------------------------------
 # Theme / Wallpaper
-# ------------------------------------------------------------------------------
 wallust          # Pywal alternative for color extraction from wallpapers
-# pywal            # Original tool (wallust is newer/faster)
 
-# ------------------------------------------------------------------------------
-# Hyprland Extras
-# ------------------------------------------------------------------------------
-hyprpolkitagent  # Polkit authentication agent for Hyprland
-
-# ------------------------------------------------------------------------------
-# Terminals (AUR versions)
-# ------------------------------------------------------------------------------
-ghostty          # GPU-accelerated terminal (if not in official repos yet)
-
-# ------------------------------------------------------------------------------
 # Fonts (AUR)
-# ------------------------------------------------------------------------------
 # ttf-ms-fonts    # Microsoft fonts (optional)
 
-# ------------------------------------------------------------------------------
 # Development
-# ------------------------------------------------------------------------------
-# visual-studio-code-bin  # VS Code (optional)
+visual-studio-code-bin  # VS Code (optional)
 
-# ------------------------------------------------------------------------------
 # Media
-# ------------------------------------------------------------------------------
 # spotify         # Spotify client (optional)
 # playerctl       # Media player control (might be in official repos)
