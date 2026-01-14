@@ -25,7 +25,7 @@ entries=$(printf "%s\n%s\n%s\n%s\n" "$shutdown_label" "$reboot_label" "$logout_l
 # Compact power menu. Height set to exact rows; width small but readable.
 # (wofi doesn't autosize to content reliably, so we pick sane compact defaults.)
 # Use fixed size to avoid any geometry reflow/jitter when moving selection.
-choice="$(printf "%s" "$entries" | wofi --dmenu --prompt "Power" --width 280 --height 208)"
+choice="$(printf "%s" "$entries" | wofi --dmenu --prompt "Power" --width 280 --height 265)"
 
 [ -z "${choice}" ] && exit 0
 
@@ -38,7 +38,7 @@ confirm_entries=$(printf "%s\n%s\n" "$confirm_label" "$cancel_label")
 
 # Confirm/cancel in one row.
 # Keep the same theme; just hide the search bar.
-confirm="$(printf "%s" "$confirm_entries" | wofi --dmenu --prompt "${action_text}?" --columns 2 --width 360 --height 60)"
+confirm="$(printf "%s" "$confirm_entries" | wofi --dmenu --prompt "${action_text}?" --columns 2 --width 360 --height 117)"
 
 [ "${confirm}" != "${confirm_label}" ] && exit 0
 
