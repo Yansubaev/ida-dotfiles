@@ -151,7 +151,7 @@ print_reminders() {
     echo -e "${YELLOW}Wrapper scripts needed:${RESET}"
     echo "   Create these in scripts/ to expose internal scripts:"
     echo "   - scripts/ida-lyrics-main -> calls scripts/lyrics/lyrics-main.sh"
-    echo "   - scripts/ida-lyrics-tooltip -> calls scripts/lyrics/lyrics-tooltip.sh"
+    # (ida-lyrics-tooltip removed; ida-lyrics-main provides tooltip in JSON output)
     echo "   - scripts/ida-theme-watch -> calls scripts/theme/ida-theme-watch"
     echo ""
 }

@@ -44,10 +44,200 @@ fi
 : "${WEBAPP_PROFILE_DIR:=$HOME/.local/share/webapps}"
 
 # Determine launch type
-MODE="$1"
-shift
+MODE="${1:-}"
+shift || true
+
+ida__registry_file() {
+  echo "${IDA_REGISTRY_FILE:-$HOME/.local/share/ida/apps.tsv}"
+}
+
+ida__list_apps() {
+  local filter_type="${1:-}"
+  local registry_file
+  registry_file="$(ida__registry_file)"
+
+  [ -f "$registry_file" ] || return 0
+
+  if [ -n "$filter_type" ]; then
+    awk -F'\t' -v t="$filter_type" '$2==t { printf "%-20s %-8s %s\n", $1, $2, $3 }' "$registry_file"
+    return 0
+  fi
+
+  awk -F'\t' '{ printf "%-20s %-8s %s\n", $1, $2, $3 }' "$registry_file"
+}
+
+ida__remove_apps() {
+  local app_name="${1:-}"
+  local filter_type="${2:-}"
+  local assume_yes="${3:-false}"
+
+  local registry_file
+  registry_file="$(ida__registry_file)"
+
+  [ -f "$registry_file" ] || { echo "Registry not found: $registry_file" >&2; return 1; }
+
+  mapfile -t matches < <(
+    awk -F'\t' -v n="$app_name" -v t="$filter_type" '($1==n && (t=="" || $2==t)) { print $0 }' "$registry_file"
+  )
+
+  if [ "${#matches[@]}" -eq 0 ]; then
+    echo "No registry entries found for: $app_name" >&2
+    return 1
+  fi
+
+  if [ "$assume_yes" != "true" ]; then
+    echo "Will remove:"
+    printf '  %s\n' "${matches[@]}"
+
+    if [ -t 0 ]; then
+      local reply=""
+      read -r -p "Proceed? [y/N] " reply
+      case "${reply,,}" in y|yes) : ;; *) echo "Aborted." >&2; return 1 ;; esac
+    else
+      echo "Aborted (non-interactive). Use --yes." >&2
+      return 1
+    fi
+  fi
+
+  local changed="false"
+  local line
+  for line in "${matches[@]}"; do
+    IFS=$'\t' read -r name type desktop_file icon_value created_at <<<"$line"
+
+    if [ -n "$desktop_file" ] && [ -f "$desktop_file" ]; then
+      rm -f "$desktop_file"
+      changed="true"
+    fi
+
+    if [ -n "$icon_value" ]; then
+      case "$icon_value" in
+        "$HOME/.local/share/icons/ida"/*)
+          if [ -f "$icon_value" ]; then
+            rm -f "$icon_value"
+            changed="true"
+          fi
+          ;;
+      esac
+    fi
+  done
+
+  awk -F'\t' -v n="$app_name" -v t="$filter_type" '!( $1==n && (t=="" || $2==t) )' "$registry_file" >"${registry_file}.tmp" || true
+  mv -f "${registry_file}.tmp" "$registry_file"
+
+  if [ "$changed" = "true" ]; then
+    update-desktop-database ~/.local/share/applications >/dev/null 2>&1 || true
+  fi
+
+  echo "Removed: $app_name"
+}
 
 case "$MODE" in
+--list-terminal)
+  ida__list_apps "terminal"
+  ;;
+--list-webapp)
+  ida__list_apps "webapp"
+  ;;
+--list)
+  filter_type=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --type)
+        shift
+        filter_type="${1:-}"
+        ;;
+      -h|--help)
+        echo "Usage: ida-app-launcher --list [--type terminal|webapp]"
+        exit 0
+        ;;
+      *)
+        echo "Unknown argument: $1" >&2
+        exit 1
+        ;;
+    esac
+    shift
+  done
+  if [ -n "$filter_type" ] && [ "$filter_type" != "terminal" ] && [ "$filter_type" != "webapp" ]; then
+    echo "Invalid --type: $filter_type" >&2
+    exit 1
+  fi
+  ida__list_apps "$filter_type"
+  ;;
+--remove-terminal)
+  app_name="${1:-}"
+  if [ -z "$app_name" ] || [ "$app_name" = "-h" ] || [ "$app_name" = "--help" ]; then
+    echo "Usage: ida-app-launcher --remove-terminal <name> [--yes]"
+    exit 0
+  fi
+  shift || true
+  assume_yes="false"
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --yes|-y) assume_yes="true" ;;
+      -h|--help) echo "Usage: ida-app-launcher --remove-terminal <name> [--yes]"; exit 0 ;;
+      *) echo "Unknown argument: $1" >&2; exit 1 ;;
+    esac
+    shift
+  done
+  ida__remove_apps "$app_name" "terminal" "$assume_yes"
+  ;;
+--remove-webapp)
+  app_name="${1:-}"
+  if [ -z "$app_name" ] || [ "$app_name" = "-h" ] || [ "$app_name" = "--help" ]; then
+    echo "Usage: ida-app-launcher --remove-webapp <name> [--yes]"
+    exit 0
+  fi
+  shift || true
+  assume_yes="false"
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --yes|-y) assume_yes="true" ;;
+      -h|--help) echo "Usage: ida-app-launcher --remove-webapp <name> [--yes]"; exit 0 ;;
+      *) echo "Unknown argument: $1" >&2; exit 1 ;;
+    esac
+    shift
+  done
+  ida__remove_apps "$app_name" "webapp" "$assume_yes"
+  ;;
+--remove)
+  app_name=""
+  filter_type=""
+  assume_yes="false"
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --name)
+        shift
+        app_name="${1:-}"
+        ;;
+      --type)
+        shift
+        filter_type="${1:-}"
+        ;;
+      --yes|-y)
+        assume_yes="true"
+        ;;
+      -h|--help)
+        echo "Usage: ida-app-launcher --remove --name <name> [--type terminal|webapp] [--yes]"
+        exit 0
+        ;;
+      *)
+        echo "Unknown argument: $1" >&2
+        exit 1
+        ;;
+    esac
+    shift
+  done
+  if [ -z "$app_name" ]; then
+    echo "Missing --name" >&2
+    echo "Usage: ida-app-launcher --remove --name <name> [--type terminal|webapp] [--yes]" >&2
+    exit 1
+  fi
+  if [ -n "$filter_type" ] && [ "$filter_type" != "terminal" ] && [ "$filter_type" != "webapp" ]; then
+    echo "Invalid --type: $filter_type" >&2
+    exit 1
+  fi
+  ida__remove_apps "$app_name" "$filter_type" "$assume_yes"
+  ;;
 terminal)
   # Run arbitrary/complex commands (pipes, quotes, etc.) safely via a shell.
   # Many terminals (kitty/alacritty/etc.) do not parse a single string with spaces
@@ -84,7 +274,7 @@ webapp)
   esac
   ;;
 *)
-  echo "Usage: ida-app-launcher {terminal|webapp} [arguments]"
+  echo "Usage: ida-app-launcher {terminal|webapp|--list|--list-terminal|--list-webapp|--remove|--remove-terminal|--remove-webapp} [arguments]"
   exit 1
   ;;
 esac

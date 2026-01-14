@@ -70,7 +70,7 @@
     "on-click": "~/ida/config/wofi/scripts/powermenu.sh",
   },
   "custom/lyrics": {
-    "exec": "stdbuf -oL ~/ida/scripts/lyrics/lyrics-main.sh --offset 500 --interval 50 --max-length 80 --json",
+    "exec": "stdbuf -oL ida-lyrics-main --offset 500 --interval 50 --max-length 80 --json",
     "return-type": "json",
     "format": "{}",
     "on-click": "playerctl play-pause",
