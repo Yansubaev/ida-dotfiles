@@ -8,7 +8,7 @@
   "reload_style_on_change": true,
   "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/lyrics"],
   "modules-center": ["clock"],
-  "modules-right": ["pulseaudio", "tray", "custom/power"],
+  "modules-right": ["pulseaudio", "network", "tray", "custom/power"],
   "hyprland/workspaces": {
     "format": "{name}",
     "sort-by-number": true,
@@ -40,8 +40,21 @@
       "car": "",
       "default": ["", "", ""],
     },
-    "on-click": "bash ~/.config/waybar/scripts/nowplaying.sh >/dev/null 2>&1 &",
-    "on-click-right": "/home/ida/.local/bin/ida-app-launcher terminal \"wiremix\"",
+    "on-click": "ida-app-launcher terminal wiremix",
+  },
+  "network": {
+    "format-wifi": "{icon}",
+    "format-ethernet": "{icon}",
+    "format-disconnected": "{icon}",
+    "format-icons": {
+      "wifi": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+      "ethernet": "󰈀",
+      "disconnected": "󰖪",
+    },
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+    "tooltip-format-ethernet": "Ethernet",
+    "tooltip-format-disconnected": "Not connected",
+    "on-click": "ida-app-launcher terminal wlctl",
   },
   "custom/launcher": {
     "format": "󰀻",

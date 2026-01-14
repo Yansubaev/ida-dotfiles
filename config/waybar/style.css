@@ -19,10 +19,10 @@ window#waybar {
 }
 
 tooltip {
-  border-radius: 12px;
+  border-radius: 5px;
   background-color: @ida-bg-alt;
   border: 2px solid @ida-accent2;
-  padding: 8px 12px;
+  padding: 8px 14px;
 }
 
 /* Modules: Base Style */
@@ -31,6 +31,7 @@ tooltip {
 #custom-countdown,
 #backlight,
 #pulseaudio,
+#network,
 #tray,
 #custom-power,
 #custom-launcher,
@@ -62,6 +63,7 @@ tooltip {
 /* Modules: Hover Effects */
 #backlight:hover,
 #pulseaudio:hover,
+#network:hover,
 #custom-music:hover,
 #idle_inhibitor:hover,
 #custom-clip:hover {
@@ -113,15 +115,20 @@ tooltip {
   color: @ida-text-on-accent;
 }
 
+#network.disconnected,
 #pulseaudio.muted {
   background: @ida-warning;
   color: @ida-text-on-accent;
 }
 
+#network {
+  padding: 0 15px 0 10px;
+}
+
 #custom-power {
   background: @ida-accent;
   color: @ida-text-on-accent;
-  padding: 0px 16px 0px 12px;
+  padding: 0px 14px 0px 10px;
 }
 
 #custom-power:hover {
