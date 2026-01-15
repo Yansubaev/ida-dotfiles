@@ -30,8 +30,7 @@ alacritty
 kitty
 
 # File Manager
-dolphin
-# thunar           # Alternative lightweight file manager
+nemo
 
 # Editors
 neovim
@@ -84,4 +83,3 @@ fd               # Fast find
 fzf              # Fuzzy finder
 btop
 unzip
-kde-cli-tools    # for Dolphin to properly work

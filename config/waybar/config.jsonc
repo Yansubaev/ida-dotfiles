@@ -8,11 +8,24 @@
   "reload_style_on_change": true,
   "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/lyrics"],
   "modules-center": ["clock"],
-  "modules-right": ["pulseaudio", "network", "tray", "custom/power"],
+  "modules-right": [
+    "hyprland/language",
+    "pulseaudio",
+    "network",
+    "tray",
+    "custom/power",
+  ],
   "hyprland/workspaces": {
     "format": "{name}",
     "sort-by-number": true,
     "on-click": "activate",
+  },
+  "hyprland/language": {
+    "format": "{}",
+    "format-en": "EN",
+    "format-ru": "RU",
+    "on-click": "hyprctl switchxkblayout current next",
+    "on-click-right": "hyprctl switchxkblayout current prev",
   },
   "tray": {
     "icon-size": 17,

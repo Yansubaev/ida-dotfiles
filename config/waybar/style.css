@@ -9,7 +9,7 @@
     Helvetica,
     Arial,
     sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   min-height: 0;
 }
 
@@ -27,15 +27,13 @@ tooltip {
 
 /* Modules: Base Style */
 #clock,
-#custom-todo,
-#custom-countdown,
-#backlight,
 #pulseaudio,
 #network,
 #tray,
 #custom-power,
 #custom-launcher,
 #custom-lyrics,
+#language,
 #workspaces {
   background: @ida-bg-alt;
   padding: 2px 12px;
@@ -46,27 +44,10 @@ tooltip {
   transition: all 0.3s ease-out;
 }
 
-/* Modules: App Launcher Strip */
-#custom-terminal,
-#custom-music {
-  background: @ida-bg-alt;
-  padding: 2px 12px;
-  margin-top: 4px;
-  margin-right: 2px;
-  margin-bottom: 4px;
-  color: @ida-fg;
-  border: 3px solid transparent;
-  border-radius: 0;
-  transition: all 0.3s ease-out;
-}
-
 /* Modules: Hover Effects */
-#backlight:hover,
 #pulseaudio:hover,
 #network:hover,
-#custom-music:hover,
-#idle_inhibitor:hover,
-#custom-clip:hover {
+#language:hover {
   color: @ida-text-on-accent;
   background: @ida-accent;
   border-color: @ida-accent;
@@ -97,7 +78,7 @@ tooltip {
 #custom-launcher {
   background: @ida-accent;
   color: @ida-text-on-accent;
-  padding: 0 12px 0 10px;
+  padding: 0 10px 0 10px;
 }
 
 #custom-launcher:hover {
