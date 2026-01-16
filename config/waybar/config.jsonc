@@ -91,6 +91,7 @@
       "playing": "󰐊",
       "paused": "󰏤",
     },
+    "max-length": 50,
     "on-click": "playerctl play-pause",
     "on-scroll-up": "playerctl previous",
     "on-scroll-down": "playerctl next",
@@ -110,7 +111,7 @@
     "on-click": "~/ida/config/wofi/scripts/powermenu.sh",
   },
   "custom/lyrics": {
-    "exec": "stdbuf -oL ida-lyrics-main --offset 500 --interval 50 --max-length 80 --json",
+    "exec": "stdbuf -oL ida-lyrics-main --offset 200 --interval 50 --max-length 80 --json",
     "return-type": "json",
     "format": " {}",
   },

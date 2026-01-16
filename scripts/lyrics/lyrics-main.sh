@@ -210,9 +210,9 @@ while true; do
     continue
   fi
 
-  cache_key=$(printf "%s_%s" "$artist" "$title" |
-    tr ' ' '_' |
-    tr -dc 'A-Za-z0-9_')
+  # Stable cache key for any Unicode (incl. Cyrillic)
+  # Also includes duration to avoid collisions across different tracks
+  cache_key=$(printf '%s\n%s\n%s' "$artist" "$title" "$duration_sec" | sha256sum | awk '{print $1}')
   cache_file="${cache_dir}/${cache_key}.json"
 
   if [[ "$cache_key" != "$last_cache_key" ]]; then
@@ -259,7 +259,10 @@ while true; do
 
       response=$(curl -s -H "User-Agent: waybar_lyrics (https://github.com/rainaisntbald/waybar_lyrics)" "$api_url")
       response=$(echo "$response" | jq --arg url "$api_url" '. + {request_url: $url}')
-      echo "$response" >"$cache_file"
+
+      # Write atomically to avoid partial cache on quick track skipping
+      tmp_cache_file="${cache_file}.$$"
+      echo "$response" >"$tmp_cache_file" && mv -f "$tmp_cache_file" "$cache_file"
     fi
 
     raw_lyrics=$(jq -r '.syncedLyrics // ""' <"$cache_file" 2>/dev/null)
