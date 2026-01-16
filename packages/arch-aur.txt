@@ -4,6 +4,8 @@
 # These packages require an AUR helper (yay/paru).
 # The installer will automatically install yay if no AUR helper is found.
 
+pacsea
+
 # Networking
 wlctl-bin
 brave-bin

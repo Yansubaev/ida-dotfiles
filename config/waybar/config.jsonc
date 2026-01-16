@@ -1,7 +1,7 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 28,
+  "height": 36,
   "spacing": 2,
   "margin-top": 0,
   "margin-bottom": 0,
@@ -18,6 +18,11 @@
   "hyprland/workspaces": {
     "format": "{name}",
     "sort-by-number": true,
+    "tooltip": true,
+    "tooltips": {
+      "default": "{name}: {windows}",
+      "empty": "{name}",
+    },
     "on-click": "activate",
   },
   "hyprland/language": {
@@ -53,7 +58,7 @@
       "car": "",
       "default": ["", "", ""],
     },
-    "on-click": "ida-app-launcher terminal wiremix",
+    "on-click": "ida-app-launcher terminal \"wiremix -v output\"",
   },
   "network": {
     "format-wifi": "{icon}",
@@ -68,6 +73,7 @@
     "tooltip-format-ethernet": "Ethernet",
     "tooltip-format-disconnected": "Not connected",
     "on-click": "ida-app-launcher terminal wlctl",
+    "on-click-right": "ida-app-launcher terminal bluetui",
   },
   "custom/launcher": {
     "format": "󰀻",
