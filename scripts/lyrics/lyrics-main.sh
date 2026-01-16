@@ -152,12 +152,12 @@ generate_tooltip() {
     if ((i == current_idx)); then
       # Highlight current line
       if [[ -n "$output" ]]; then
-        output+="\n"
+        output+=$'\n'
       fi
       output+="▶ ${line_text} ◀"
     else
       if [[ -n "$output" ]]; then
-        output+="\n"
+        output+=$'\n'
       fi
       output+="  ${line_text}"
     fi
@@ -179,7 +179,7 @@ while true; do
     if [[ "$status" == "Paused" && -n "$last_output" ]]; then
       # Keep showing last lyrics line when paused
       if ((json_output)); then
-        printf '{"text":"%s","tooltip":"%s"}\n' "$last_output" "$last_tooltip"
+        jq -cn --arg text "$last_output" --arg tooltip "$last_tooltip" '{text:$text, tooltip:$tooltip}'
       else
         echo "$last_output"
       fi
@@ -239,7 +239,7 @@ while true; do
 
       if ((json_output)); then
         loading_text=$(truncate_text "Loading lyrics for $title - $artist")
-        printf '{"text":"%s","tooltip":"Loading..."}\n' "$loading_text"
+        jq -cn --arg text "$loading_text" --arg tooltip "Loading..." '{text:$text, tooltip:$tooltip}'
       else
         echo "$(truncate_text "Loading lyrics for $title - $artist")"
       fi
@@ -323,15 +323,15 @@ while true; do
     else
       last_line_idx=$current_idx
       current_line="${LYRICS_LINES[$current_idx]}"
-      output="  $(truncate_text "$current_line")"
+      output=" $(truncate_text "$current_line")"
 
       if ((json_output)); then
         # Generate tooltip only when needed
         tooltip=$(generate_tooltip "$current_idx")
-        # Escape for JSON
-        tooltip_escaped=$(echo "$tooltip" | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-        printf '{"text":"%s","tooltip":"%s"}\n' "$output" "$tooltip_escaped"
-        last_tooltip="$tooltip_escaped"
+
+        # Produce valid JSON; keep real newlines for tooltip
+        jq -cn --arg text "$output" --arg tooltip "$tooltip" '{text:$text, tooltip:$tooltip}'
+        last_tooltip="$tooltip"
       else
         echo "$output"
       fi

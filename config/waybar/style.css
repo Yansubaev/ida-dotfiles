@@ -32,8 +32,8 @@ tooltip {
 #tray,
 #custom-power,
 #custom-launcher,
-#custom-lyrics,
 #language,
+#mpris,
 #workspaces {
   background: @ida-bg-alt;
   padding: 2px 12px;
@@ -92,8 +92,7 @@ tooltip {
 }
 
 #clock {
-  background: @ida-info;
-  color: @ida-text-on-accent;
+  background: @ida-bg-alt;
 }
 
 #network.disconnected,
@@ -115,4 +114,8 @@ tooltip {
 #custom-power:hover {
   background: @ida-urgent;
   border-color: @ida-urgent;
+}
+
+#custom-lyrics {
+  background: transparent;
 }

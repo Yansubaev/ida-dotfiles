@@ -6,7 +6,12 @@
   "margin-top": 0,
   "margin-bottom": 0,
   "reload_style_on_change": true,
-  "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/lyrics"],
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces",
+    "mpris",
+    "custom/lyrics",
+  ],
   "modules-center": ["clock"],
   "modules-right": [
     "hyprland/language",
@@ -75,6 +80,22 @@
     "on-click": "ida-app-launcher terminal wlctl",
     "on-click-right": "ida-app-launcher terminal bluetui",
   },
+  "mpris": {
+    "format": "{status_icon} {player_icon}  {dynamic}",
+    "dynamic-order": ["artist", "title"],
+    "player-icons": {
+      "spotify": "",
+      "default": "",
+    },
+    "status-icons": {
+      "playing": "󰐊",
+      "paused": "󰏤",
+    },
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl previous",
+    "on-scroll-down": "playerctl next",
+    "tooltip-format": "{artist} - {title}\n \n{album}",
+  },
   "custom/launcher": {
     "format": "󰀻",
     "tooltip": true,
@@ -91,9 +112,6 @@
   "custom/lyrics": {
     "exec": "stdbuf -oL ida-lyrics-main --offset 500 --interval 50 --max-length 80 --json",
     "return-type": "json",
-    "format": "{}",
-    "on-click": "playerctl play-pause",
-    "on-scroll-up": "playerctl previous",
-    "on-scroll-down": "playerctl next",
+    "format": " {}",
   },
 }
