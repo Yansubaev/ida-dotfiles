@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Show Hyprland keybinds (with descriptions) using wofi.
+# Output format: "MODS+KEY — Description".
+
+if ! command -v hyprctl >/dev/null; then
+  echo "hyprctl not found" >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null; then
+  echo "jq not found" >&2
+  exit 1
+fi
+
+if pgrep -x wofi >/dev/null; then
+  pkill -x wofi
+  exit 0
+fi
+
+decode_modmask() {
+  local mask="$1"
+  local -a mods=()
+
+  # Hyprland uses wlroots modifier bits (common defaults):
+  # 1=SHIFT, 4=CTRL, 8=ALT, 64=SUPER
+  # Some setups can also include 2=CAPS, 16=MOD2, 32=MOD3, 128=MOD4, 256=MOD5.
+  ((mask & 64)) && mods+=("SUPER")
+  ((mask & 8)) && mods+=("ALT")
+  ((mask & 4)) && mods+=("CTRL")
+  ((mask & 1)) && mods+=("SHIFT")
+  ((mask & 2)) && mods+=("CAPS")
+  ((mask & 16)) && mods+=("MOD2")
+  ((mask & 32)) && mods+=("MOD3")
+  ((mask & 128)) && mods+=("MOD4")
+  ((mask & 256)) && mods+=("MOD5")
+
+  local out=""
+  for m in "${mods[@]}"; do
+    if [[ -z "$out" ]]; then
+      out="$m"
+    else
+      out+="+$m"
+    fi
+  done
+
+  printf '%s' "$out"
+}
+
+decode_key() {
+  local key="$1"
+
+  case "$key" in
+  mouse:272) printf '%s' "MouseLeft" ;;
+  mouse:273) printf '%s' "MouseRight" ;;
+  mouse:274) printf '%s' "MouseMiddle" ;;
+  mouse:275) printf '%s' "MouseBack" ;;
+  mouse:276) printf '%s' "MouseForward" ;;
+  mouse:*)
+    printf '%s' "Mouse:${key#mouse:}"
+    ;;
+  *)
+    printf '%s' "$key"
+    ;;
+  esac
+}
+
+format_keybind() {
+  local modmask="$1"
+  local key="$2"
+
+  local mods
+  mods="$(decode_modmask "$modmask")"
+
+  local pretty_key
+  pretty_key="$(decode_key "$key")"
+
+  if [[ -n "$mods" ]]; then
+    printf '%s+%s' "$mods" "$pretty_key"
+  else
+    printf '%s' "$pretty_key"
+  fi
+}
+
+hyprctl binds -j |
+  jq -r '.[] | select(.has_description == true) | [.modmask, .key, .description] | @tsv' |
+  while IFS=$'\t' read -r modmask key description; do
+    combo="$(format_keybind "$modmask" "$key")"
+    printf '%s — %s\n' "$combo" "$description"
+  done |
+  wofi --dmenu --prompt "Keybinds" --width 500 --height 600

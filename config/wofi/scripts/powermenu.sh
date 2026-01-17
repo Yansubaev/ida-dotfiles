@@ -25,7 +25,7 @@ entries=$(printf "%s\n%s\n%s\n%s\n" "$shutdown_label" "$reboot_label" "$logout_l
 # Compact power menu. Height set to exact rows; width small but readable.
 # (wofi doesn't autosize to content reliably, so we pick sane compact defaults.)
 # Use fixed size to avoid any geometry reflow/jitter when moving selection.
-choice="$(printf "%s" "$entries" | wofi --dmenu --prompt "Power" --width 280 --height 265)"
+choice="$(printf "%s" "$entries" | wofi --dmenu --prompt "Power" --width 280 --height 255)"
 
 [ -z "${choice}" ] && exit 0
 
