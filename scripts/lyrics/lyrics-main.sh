@@ -238,10 +238,10 @@ while true; do
       fi
 
       if ((json_output)); then
-        loading_text=$(truncate_text "Loading lyrics for $title - $artist")
-        jq -cn --arg text "$loading_text" --arg tooltip "Loading..." '{text:$text, tooltip:$tooltip}'
+        loading_text=$(truncate_text "󰇘")
+        jq -cn --arg text "$loading_text" --arg tooltip "Loading lyrics for $title - $artist" '{text:$text, tooltip:$tooltip}'
       else
-        echo "$(truncate_text "Loading lyrics for $title - $artist")"
+        echo "$(truncate_text "󰇘")"
       fi
 
       sleep 2 # Sleep to allow playerctl to update metadata fully, avoids incorrect api calls

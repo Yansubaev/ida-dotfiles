@@ -9,6 +9,7 @@
   "modules-left": [
     "custom/launcher",
     "hyprland/workspaces",
+    //   "niri/workspaces",
     "mpris",
     "custom/lyrics",
   ],
@@ -21,14 +22,30 @@
     "custom/power",
   ],
   "hyprland/workspaces": {
-    "format": "{name}",
+    "format": "{icon}",
+    "format-icons": {
+      "1": "",
+      "2": "",
+      "3": "󰖟",
+      "magic": "",
+    },
     "sort-by-number": true,
+    "show-special": true,
+    "persistent-workspaces": {
+      "*": [1, 2, 3],
+    },
     "tooltip": true,
     "tooltips": {
       "default": "{name}: {windows}",
       "empty": "{name}",
     },
     "on-click": "activate",
+  },
+  "niri/workspaces": {
+    "format": "{value}",
+    "sort-by-number": true,
+    "on-scroll-up": "niri msg action focus-column-left",
+    "on-scroll-down": "niri msg action focus-column-right",
   },
   "hyprland/language": {
     "format": "{}",
@@ -85,6 +102,9 @@
     "dynamic-order": ["artist", "title"],
     "player-icons": {
       "spotify": "",
+      "brave": "󰊯",
+      "chromium": "",
+      "firefox": "",
       "default": "",
     },
     "status-icons": {

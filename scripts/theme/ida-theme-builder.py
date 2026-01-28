@@ -343,8 +343,11 @@ class ThemeBuilder:
         semantic = data["semantic"]
 
         bg = theme["background"]
+        bg_alt = ColorUtils.lighten(bg, 0.08)
+
         template_data = {
             "bg": bg,
+            "bg_alt": bg_alt,
             "fg": theme["foreground"],
             "accent": semantic["accent"],
             "border": theme["colors"][5],

@@ -17,3 +17,6 @@ end
 if test -f ~/.config/fish/ida-git-colors.fish
     source ~/.config/fish/ida-git-colors.fish
 end
+
+set -gx PATH $HOME/.cargo/bin $PATH
+set -gx PATH $HOME/.dotnet/tools $PATH

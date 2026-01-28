@@ -1,0 +1,6 @@
+// Use 2 spaces for indentation
+indent_level 2
+// Keep comments in place (best effort)
+strip_comments #false
+// Assume KDL v2
+assume_version v2

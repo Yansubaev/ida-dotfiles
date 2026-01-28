@@ -3,7 +3,7 @@ include=~/.config/mako/ida-theme.conf
 
 sort=-time
 max-history=6
-font=JetBrainsMono Nerd Font 12
+font=Roboto 12
 width=350
 border-size=2
 border-radius=5

@@ -4,8 +4,8 @@
   border: none;
   border-radius: 0;
   font-family:
+    RobotoMono Nerd Font,
     JetBrainsMono Nerd Font,
-    Roboto,
     Helvetica,
     Arial,
     sans-serif;
@@ -55,7 +55,7 @@ tooltip {
 
 #workspaces button {
   background: transparent;
-  padding: 0 8px;
+  padding: 0 10px 0px 7px;
   margin-left: 2px;
   transition: all 0.3s ease-out;
   border-radius: 8px;
@@ -73,8 +73,11 @@ tooltip {
   background: @ida-urgent;
 }
 
-/* Modules: Specific Styles */
+#workspaces button.special {
+  color: @ida-accent;
+}
 
+/* Modules: Specific Styles */
 #custom-launcher {
   background: @ida-accent;
   color: @ida-text-on-accent;
